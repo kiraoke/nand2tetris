@@ -1,25 +1,24 @@
 import parse from "./parser.ts";
 import translate from "./translater.ts";
 
-const file = `
-// This file is part of www.nand2tetris.org
-// and the book "The Elements of Computing Systems"
-// by Nisan and Schocken, MIT Press.
-
-// Computes R0 = 2 + 3  (R0 refers to RAM[0])
-
-@2
-D=A
-@3
-D=D+A
-@0
-M=D
-`;
+const file = await Deno.readTextFile("app.asm");
 
 const instructions = file.split("\n");
+
+const output = [];
 
 for (let i = 0; i < instructions.length; i++) {
   const instruct = parse(instructions[i]);
 
-  console.log(translate(instruct));
+  try {
+    const out = translate(instruct);
+
+    if (out) output.push(out);
+  } catch (e) {
+    console.log(instruct);
+  }
 }
+
+await Deno.writeTextFile("out.bin", output.join("\n"));
+
+console.log("arigato");

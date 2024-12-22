@@ -22,7 +22,7 @@ interface DCommand {
 interface JMPCommand {
   valid: true;
   type: COMMAND.JUMP;
-  dest: string;
+  comp: string;
   jmp: string;
 }
 
@@ -33,18 +33,20 @@ interface InvalidCommand {
 export type Parsed = ACommand | DCommand | JMPCommand | InvalidCommand;
 
 function parse(command: string): Parsed {
-  if (command.slice(0, 2) === "//") {
+  if (command.slice(0, 2) === "//") { // (0,2) here 2 is excluded so 0 and 1
     // COMMENT
     return {
       valid: false,
     };
   }
 
+  command = command.split("/")[0];
+
   if (command[0] === "@") { // A COMMAND
     return {
       valid: true,
       type: COMMAND.A,
-      address: parseInt(command[1]),
+      address: parseInt(command.slice(1, command.length)),
     };
   }
 
@@ -69,7 +71,7 @@ function parse(command: string): Parsed {
     return {
       valid: true,
       type: COMMAND.JUMP,
-      dest: cmds[0],
+      comp: cmds[0],
       jmp: cmds[1],
     };
   }

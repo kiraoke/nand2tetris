@@ -66,10 +66,20 @@ function translate(command: Parsed): string | undefined {
     const comp = getCode(compCodes, command.comp);
     const dest = getCode(destCodes, command.dest);
 
-    if (!comp) throw Error("Invalid Command(COMPUTATION)" + comp);
+    if (!comp) throw Error("Invalid Command(COMPUTATION)");
     if (!dest) throw Error("Invalid Command(DESTINATION)");
 
     return `111${comp}${dest}000`;
+  }
+
+  if (command.type === COMMAND.JUMP) {
+    const comp = getCode(compCodes, command.comp);
+    const jump = getCode(jumpCodes, command.jmp);
+
+    if (!comp) throw Error("Invalid Command(COMPUTATION)");
+    if (!jump) throw Error("Invalid Command(JUMP)");
+
+    return `111${comp}000${jump}`;
   }
 }
 

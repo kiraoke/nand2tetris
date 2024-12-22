@@ -35,7 +35,7 @@ function getCode(codes: Codes, needle: string): string | undefined {
 
   for (let code = 0; code < hays.length; code++) {
     const [key, val] = hays[code];
-    if (key === needle) return val;
+    if (key === needle.replaceAll(" ", "")) return val;
   }
 
   return;
