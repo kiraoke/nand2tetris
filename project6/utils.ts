@@ -27,10 +27,10 @@ function toBinary(num: number): string {
 }
 
 interface Codes {
-  [key: string]: string;
+  [key: string]: string | number;
 }
 
-function getCode(codes: Codes, needle: string): string | undefined {
+function getCode(codes: Codes, needle: string): string | number | undefined {
   const hays = Object.entries(codes);
 
   for (let code = 0; code < hays.length; code++) {

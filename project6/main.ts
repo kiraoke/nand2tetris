@@ -1,9 +1,17 @@
 import parse from "./parser.ts";
 import translate from "./translater.ts";
+import { replaceSymbols } from "./symbols.ts";
+import removeComments from "./comments.ts";
 
 const file = await Deno.readTextFile("app.asm");
 
-const instructions = file.split("\n");
+const replaced = replaceSymbols(
+  removeComments(file),
+);
+
+console.log(replaced);
+
+const instructions = replaced.split("\n");
 
 const output = [];
 
@@ -14,7 +22,7 @@ for (let i = 0; i < instructions.length; i++) {
     const out = translate(instruct);
 
     if (out) output.push(out);
-  } catch (e) {
+  } catch {
     console.log(instruct);
   }
 }
