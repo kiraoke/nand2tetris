@@ -1,3 +1,8 @@
+import { customAlphabet } from "jsr:@viki/nanoid";
+const allowedChars =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const nanoid = customAlphabet(allowedChars, 30);
+
 const memSegments = {
   local: "local",
   argument: "argument",
@@ -116,4 +121,250 @@ function add() {
   `;
 }
 
-console.log(add());
+function sub() {
+  return `
+    @${Registers.SP}
+    A=M // set address to stack pointer
+    D=M // Get the value of the stack
+    @R13
+    M=D // Store the value in R13 of last value
+
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    D=M // Get the value of the 2nd last value
+    @R14
+    M=D // Store the value in R14 of 2nd last value
+
+    @R14
+    D=M // Get the 2nd last value
+    @R13
+    D=M-D // Subtract the last and 2nd last value (last - 2nd last)
+
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    M=D // Set the value of the sum to the 2nd last value
+
+    @${Registers.SP}
+    D=M // Set D to value of stack pointer
+    M=D-1 // Decrement the stack pointer
+  `;
+}
+
+function neg() {
+  return `
+    @${Registers.SP}
+    A=M // set address to stack pointer
+    D=M // Get the value of the stack
+    D=-D // Negate the value
+    M=D // Set the value of the negated value to the stack
+  `;
+}
+
+function eq() {
+  const random = nanoid();
+
+  return `
+    @${Registers.SP}
+    A=M // set address to stack pointer
+    D=M // Get the value of the stack
+    @R13
+    M=D // Store the value in R13 of last value
+
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    D=M // Get the value of the 2nd last value
+    @R14
+    M=D // Store the value in R14 of 2nd last value
+
+    @R13
+    D=M // Get the last value
+    @R14
+    D=D-M // Subtract the last and 2nd last value (last - 2nd last)
+    @EQ_TRUE${random}
+    D;JEQ // Jump if equal (D WILL BE 0)
+    @EQ_FALSE${random}
+    0;JMP // Jump to false
+
+    (EQ_TRUE${random})
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    M=-1 // -1 is for true
+    @CONTINUE${random}
+    0;JMP // Jump to continue
+
+    (EQ_FALSE${random})
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    M=0 // 0 is for false
+    @CONTINUE${random}
+    0;JMP // Jump to continue
+
+    (CONTINUE${random})
+    @${Registers.SP} 
+    D=M // Set D to value of stack pointer
+    M=D-1 // Decrement the stack pointer
+  `;
+}
+
+function gt() {
+  const random = nanoid();
+
+  return `
+    @${Registers.SP}
+    A=M // set address to stack pointer
+    D=M // Get the value of the stack
+    @R13
+    M=D // Store the value in R13 of last value
+
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    D=M // Get the value of the 2nd last value
+    @R14
+    M=D // Store the value in R14 of 2nd last value
+
+    @R13
+    D=M // Get the last value
+    @R14
+    D=D-M // Subtract the last and 2nd last value (last - 2nd last)
+    @GT_TRUE${random}
+    D;JGT // Jump if Last > 2nd last(D > 0)
+    @GT_FALSE${random}
+    0;JMP // Jump to false
+
+    (GT_TRUE${random})
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    M=-1 // -1 is for true
+    @CONTINUE${random}
+    0;JMP // Jump to continue
+
+    (GT_FALSE${random})
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    M=0 // 0 is for false
+    @CONTINUE${random}
+    0;JMP // Jump to continue
+
+    (CONTINUE${random})
+    @${Registers.SP} 
+    D=M // Set D to value of stack pointer
+    M=D-1 // Decrement the stack pointer
+
+  `;
+}
+
+function lt() {
+  const random = nanoid();
+
+  return `
+    @${Registers.SP}
+    A=M // set address to stack pointer
+    D=M // Get the value of the stack
+    @R13
+    M=D // Store the value in R13 of last value
+
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    D=M // Get the value of the 2nd last value
+    @R14
+    M=D // Store the value in R14 of 2nd last value
+
+    @R13
+    D=M // Get the last value
+    @R14
+    D=D-M // Subtract the last and 2nd last value (last - 2nd last)
+    @LT_TRUE${random}
+    D;JLT // Jump if Last < 2nd last(D < 0)
+    @LT_FALSE${random}
+    0;JMP // Jump to false
+
+    (LT_TRUE${random})
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    M=-1 // -1 is for true
+    @CONTINUE${random}
+    0;JMP // Jump to continue
+
+    (LT_FALSE${random})
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    M=0 // 0 is for false
+    @CONTINUE${random}
+    0;JMP // Jump to continue
+
+    (CONTINUE${random})
+    @${Registers.SP} 
+    D=M // Set D to value of stack pointer
+    M=D-1 // Decrement the stack pointer
+
+  `;
+}
+
+function and() {
+  return `
+    @${Registers.SP}
+    A=M // set address to stack pointer
+    D=M // Get the value of the stack
+    @R13
+    M=D // Store the value in R13 of last value
+
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    D=M // Get the value of the 2nd last value
+    @R14
+    M=D // Store the value in R14 of 2nd last value
+
+    @R13
+    D=M // Get the last value
+    @R14
+    D=D&M // And the last and 2nd last value
+
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    M=D // Set the value of the AND to the 2nd last value
+
+    @${Registers.SP}
+    M=M-1 // Decrement the stack pointer
+  `;
+}
+
+
+function or() {
+  return `
+    @${Registers.SP}
+    A=M // set address to stack pointer
+    D=M // Get the value of the stack
+    @R13
+    M=D // Store the value in R13 of last value
+
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    D=M // Get the value of the 2nd last value
+    @R14
+    M=D // Store the value in R14 of 2nd last value
+
+    @R13
+    D=M // Get the last value
+    @R14
+    D=D|M // OR the last and 2nd last value
+
+    @${Registers.SP}
+    A=M-1 // set address to 2nd last value
+    M=D // Set the value of the OR to the 2nd last value
+
+    @${Registers.SP}
+    M=M-1 // Decrement the stack pointer
+  `;
+}
+
+function not() {
+  return `
+    @${Registers.SP}
+    A=M // set address to stack pointer
+    D=M // Get the value of the stack
+    D=!D // NOT the value
+    M=D // Set the value of the NOT to the stack
+  `;
+}
+
+console.log(not());
