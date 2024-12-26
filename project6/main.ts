@@ -9,6 +9,7 @@ const replaced = replaceSymbols(
   removeComments(file),
 );
 
+
 console.log(replaced);
 
 const instructions = replaced.split("\n");
