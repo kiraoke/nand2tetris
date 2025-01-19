@@ -13,7 +13,7 @@ type LogicalCommand = {
 type BranchCommand = {
   type: "goto" | "if-goto" | "label";
   label: string;
-}
+};
 
 const logicalCommands = [
   "add",
@@ -28,8 +28,9 @@ const logicalCommands = [
 ];
 
 const branchCommands = [
-  'goto',
-  'if-goto',
+  "goto",
+  "if-goto",
+  "label"
 ];
 
 type Command = MemoryCommand | LogicalCommand | BranchCommand;
@@ -52,12 +53,13 @@ function parse(command: string): Command {
   }
 
   if (branchCommands.includes(instructions[0])) {
-   return {
-    type: instructions[0] as BranchCommand["type"],
-    label: instructions[1],
-   } 
+    return {
+      type: instructions[0] as BranchCommand["type"],
+      label: instructions[1],
+    };
   }
 
+  console.log("commie", command, instructions);
   throw new Error("Invalid Command");
 }
 
