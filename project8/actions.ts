@@ -417,11 +417,190 @@ function ifGoto(label: string) {
   `;
 }
 
+function call(funcName: string, args: number) {
+  const random = nanoid();
+
+  return `
+   @RETURN_${funcName}_${random}
+   D=A // get return address
+   // store return address
+   @${Registers.SP}
+   A=M // set address to sp 
+   M=D // set RETURN ADDRESS
+   @${Registers.SP}
+   M=M+1 // increment SP
+
+   // store LCL of caller
+   @${Registers.LCL}
+   D=M
+   @${Registers.SP}
+   A=M // set address to sp 
+   M=D // set LCL 
+   @${Registers.SP}
+   M=M+1 // increment SP
+
+   // store ARG of caller   
+   @${Registers.ARG}
+   D=M
+   @${Registers.SP}
+   A=M // set address to sp 
+   M=D // set ARG 
+   @${Registers.SP}
+   M=M+1 // increment SP
+
+
+   // store THIS of caller   
+   @${Registers.THIS}
+   D=M
+   @${Registers.SP}
+   A=M // set address to sp 
+   M=D // set THIS 
+   @${Registers.SP}
+   M=M+1 // increment SP
+
+
+   // store THAT of caller   
+   @${Registers.THAT}
+   D=M
+   @${Registers.SP}
+   A=M // set address to sp 
+   M=D // set THAT 
+   @${Registers.SP}
+   M=M+1 // increment SP
+
+   // set ARG of callee
+   @${Registers.SP}
+   D=M
+   @${args}
+   D=D-A // arg 0 is D now
+   @${Registers.ARG}
+   M=D // set arg 0 to ARG
+
+   // go to function call
+   @${funcName}
+   0;JMP
+
+   (RETURN_${funcName}_${random})
+  `;
+}
+
+function functionCommand(name: string, parameters: number) {
+  const random = nanoid();
+  return `
+  (${name}) // Function label
+
+  // set LCL to SP
+  @${Registers.SP}
+  D=M // get SP
+  @${Registers.LCL}
+  M=D // set LCL to SP
+
+  // Initialize local variables to 0
+  @i_${random}
+  M=1 
+
+  (LOOP_${random})
+  @${parameters}
+  D=A // get no of local vars
+  @i_${random}
+  D=D-M // total local - i
+  @END_LOOP_${random}
+  D;JEQ // if i == total local vars, end loop
+  
+  // push 0 to stack
+  @${Registers.SP}
+  A=M // set address to sp
+  M=0 // set 0 to stack
+  @${Registers.SP}
+  M=M+1 // increment SP
+  @i_${random}
+  M=M+1 // increment i
+  @LOOP_${random}
+  0;JMP // loop
+
+
+  @END_LOOP_${random}
+  // rest of generated code will be here
+  `;
+}
+
+function returnCommand() {
+  return `
+    @${Registers.LCL} // get LCL
+    D=M // get pointer of LCL
+    @frame // frame is a var
+    M=D // store LCL in frame
+
+    @frame
+    D=M // get frame
+    @5
+    D=D-A // get return address
+    @returnAddress
+    M=D // store return address
+
+    // set return value at arg 0
+    @${Registers.SP}
+    A=M-1 // set address to last val on stack
+    D=M // get the return value
+    @${Registers.ARG}
+    A=M // set address to ARG
+    M=D // set return value to ARG
+
+    // set SP to ARG + 1
+    @${Registers.ARG}
+    D=M+1 // get ARG + 1
+    @${Registers.SP}
+    M=D // set SP to ARG + 1
+
+    // restore THAT of caller
+    @frame
+    D=M // get frame
+    @1
+    D=D-A // get THAT
+    @${Registers.THAT}
+    M=D // set THAT
+
+
+    // restore THIS of caller
+    @frame
+    D=M // get frame
+    @2
+    D=D-A // get THIS 
+    @${Registers.THAT}
+    M=D // set THIS
+
+
+    // restore ARG of caller
+    @frame
+    D=M // get frame
+    @3
+    D=D-A // get ARG 
+    @${Registers.ARG}
+    M=D // set ARG 
+
+
+    // restore LCL of caller
+    @frame
+    D=M // get frame
+    @4
+    D=D-A // get LCL 
+    @${Registers.LCL}
+    M=D // set LCL 
+
+    @returnAddress
+    A=M // get return address
+    0;JMP // jump to return address
+  `;
+}
+
 export {
   add,
   and,
+  call,
   eq,
+  functionCommand,
   goto,
+  returnCommand,
   gt,
   ifGoto,
   initialize,

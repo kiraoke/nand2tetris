@@ -1,7 +1,9 @@
 import {
   add,
   and,
+  call,
   eq,
+  functionCommand,
   goto,
   gt,
   ifGoto,
@@ -13,6 +15,7 @@ import {
   or,
   pop,
   push,
+  returnCommand,
   sub,
 } from "./actions.ts";
 import parse from "./parser.ts";
@@ -44,6 +47,11 @@ function translate(file: string) {
     else if (command.type === "goto") output.push(goto(command.label));
     else if (command.type === "if-goto") output.push(ifGoto(command.label));
     else if (command.type === "label") output.push(label(command.label));
+    else if (command.type === "function") {
+      output.push(functionCommand(command.name, command.parameters));
+    } else if (command.type === "call") {
+      output.push(call(command.name, command.argument));
+    } else if (command.type === "return") output.push(returnCommand());
   }
 
   return output;

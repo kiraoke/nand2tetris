@@ -15,6 +15,22 @@ type BranchCommand = {
   label: string;
 };
 
+type FunctionCommand = {
+  type: "function";
+  name: string;
+  parameters: number;
+};
+
+type CallCommand = {
+  type: "call";
+  name: string;
+  argument: number;
+};
+
+type ReturnCommand = {
+  type: "return";
+};
+
 const logicalCommands = [
   "add",
   "sub",
@@ -30,10 +46,16 @@ const logicalCommands = [
 const branchCommands = [
   "goto",
   "if-goto",
-  "label"
+  "label",
 ];
 
-type Command = MemoryCommand | LogicalCommand | BranchCommand;
+type Command =
+  | MemoryCommand
+  | LogicalCommand
+  | BranchCommand
+  | FunctionCommand
+  | CallCommand
+  | ReturnCommand;
 
 function parse(command: string): Command {
   const instructions = command.trim().split(" ");
@@ -56,6 +78,31 @@ function parse(command: string): Command {
     return {
       type: instructions[0] as BranchCommand["type"],
       label: instructions[1],
+    };
+  }
+
+  if (instructions[0] === "function") {
+    return {
+      type: instructions[0] as FunctionCommand["type"],
+      name: instructions[1],
+      parameters: parseInt(instructions[2]),
+    };
+  }
+
+  if (instructions[0] === "call") {
+    const name: string = instructions[1];
+    const args: number = parseInt(instructions[2]);
+
+    return {
+      type: "call",
+      name: name,
+      argument: args,
+    };
+  }
+
+  if (instructions[0] === "return") {
+    return {
+      type: "return",
     };
   }
 
